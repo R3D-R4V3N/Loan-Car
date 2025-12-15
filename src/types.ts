@@ -21,3 +21,8 @@ export interface LoanDetails {
   paidMonths: number
   remainingMonths: number
 }
+
+export interface AuthResponse {
+  token: string
+  username: string
+}

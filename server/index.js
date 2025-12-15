@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 import { PrismaClient, PaymentStatus } from '@prisma/client'
 
 dotenv.config()
@@ -8,6 +10,7 @@ dotenv.config()
 const prisma = new PrismaClient()
 const app = express()
 const port = process.env.PORT || 4000
+const jwtSecret = process.env.JWT_SECRET || 'loan-app-secret'
 
 app.use(cors())
 app.use(express.json())
@@ -58,6 +61,31 @@ async function ensureLoan() {
   return loan
 }
 
+async function ensureUsers() {
+  const users = [
+    { username: 'Gilbert', password: 'BMW123' },
+    { username: 'Christian', password: 'BMW123' },
+    { username: 'Frank', password: 'BMW123' },
+    { username: 'Jasper', password: 'BMW123' },
+    { username: 'Guest', password: 'BMW123' },
+  ]
+
+  await Promise.all(
+    users.map(async (user) => {
+      const existing = await prisma.user.findUnique({ where: { username: user.username } })
+      if (!existing) {
+        const passwordHash = await bcrypt.hash(user.password, 10)
+        await prisma.user.create({ data: { username: user.username, passwordHash } })
+      }
+    })
+  )
+}
+
+async function bootstrap() {
+  await ensureUsers()
+  await ensureLoan()
+}
+
 function mapLoanResponse(loan) {
   const paidPayments = loan.payments.filter((p) => p.status === PaymentStatus.PAID)
   const totalPaid = paidPayments.reduce((sum, p) => sum + p.amount, 0)
@@ -77,7 +105,48 @@ function mapLoanResponse(loan) {
   }
 }
 
-app.get('/loan', async (_req, res) => {
+function authenticate(req, res, next) {
+  const header = req.headers.authorization
+  if (!header) {
+    return res.status(401).json({ message: 'Authenticatie vereist' })
+  }
+
+  const token = header.replace('Bearer ', '')
+  try {
+    const payload = jwt.verify(token, jwtSecret)
+    req.userId = payload.id
+    return next()
+  } catch (error) {
+    return res.status(401).json({ message: 'Ongeldig of verlopen token' })
+  }
+}
+
+app.post('/auth/login', async (req, res) => {
+  const { username, password } = req.body
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Gebruikersnaam en wachtwoord vereist' })
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { username } })
+    if (!user) {
+      return res.status(401).json({ message: 'Ongeldige login' })
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash)
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Ongeldige login' })
+    }
+
+    const token = jwt.sign({ id: user.id, username: user.username }, jwtSecret, { expiresIn: '12h' })
+    return res.json({ token, username: user.username })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: 'Kon niet inloggen' })
+  }
+})
+
+app.get('/loan', authenticate, async (_req, res) => {
   try {
     const loan = await ensureLoan()
     return res.json(mapLoanResponse(loan))
@@ -87,7 +156,7 @@ app.get('/loan', async (_req, res) => {
   }
 })
 
-app.get('/payments', async (_req, res) => {
+app.get('/payments', authenticate, async (_req, res) => {
   try {
     const loan = await ensureLoan()
     const payments = await prisma.payment.findMany({ where: { loanId: loan.id }, orderBy: { month: 'asc' } })
@@ -98,7 +167,7 @@ app.get('/payments', async (_req, res) => {
   }
 })
 
-app.post('/payments/:month', async (req, res) => {
+app.post('/payments/:month', authenticate, async (req, res) => {
   const month = Number(req.params.month)
   const { status, paidAt, note } = req.body
 
@@ -140,6 +209,13 @@ app.get('/', (_req, res) => {
   res.send('Loan API draait. Gebruik /loan en /payments')
 })
 
-app.listen(port, () => {
-  console.log(`API running on http://localhost:${port}`)
-})
+bootstrap()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`API running on http://localhost:${port}`)
+    })
+  })
+  .catch((error) => {
+    console.error('Kon initiële data niet klaarzetten', error)
+    process.exit(1)
+  })

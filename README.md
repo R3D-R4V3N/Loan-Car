@@ -1,13 +1,13 @@
-# Persoonlijke renteloze lening
+# Persoonlijke renteloze autolening
 
-Een moderne full-stack app voor het visualiseren en beheren van een persoonlijke, renteloze lening van €20.000 met een looptijd van 60 maanden.
+Een moderne full-stack app voor het visualiseren en beheren van een renteloze autolening van €20.000 met een looptijd van 60 maanden.
 
 ## Functionaliteit
 - Dashboard met openstaand bedrag, progress bar en kernstatistieken.
 - Realtime charts (Recharts) voor resterend saldo en betaald vs. openstaand.
 - Tabel met alle 60 maanden, directe toggle tussen betaald/onbetaald en detailmodal met datum & notitie.
 - Validatie op looptijd en automatische herberekening van stats.
-- Eenvoudige login (gebruik `admin` / `password`).
+- Productieklaar login tegen de API (gebruik de accounts hieronder).
 
 ## Tech stack
 - Frontend: React + TypeScript, Vite, Tailwind CSS, Recharts
@@ -21,10 +21,11 @@ Een moderne full-stack app voor het visualiseren en beheren van een persoonlijke
    npm install
    ```
 
-2. Zet de database connectie (MySQL) in `.env`:
+2. Zet de database connectie (MySQL) en JWT secret in `.env`:
    ```env
    DATABASE_URL="mysql://user:password@localhost:3306/loan"
    PORT=4000
+   JWT_SECRET="vervang_dit_met_een_lang_geheim"
    ```
 
 3. Draai migraties en genereer de Prisma client (maakt ook de basisstructuur):
@@ -38,22 +39,37 @@ Een moderne full-stack app voor het visualiseren en beheren van een persoonlijke
    npm run server
    ```
 
-5. Start de frontend:
+5. Start de frontend voor lokale ontwikkeling:
    ```bash
    npm run dev
    ```
 
+6. Productiebouw maken en serveren (Vite build + Node API):
+   ```bash
+   npm run build
+   npm run preview # of serve de dist/ map via je voorkeursserver
+   ```
+
 De frontend verwacht standaard dat de API op `http://localhost:4000` draait (pas `VITE_API_URL` aan indien nodig).
 
-## Voorbeelddata
-Bij de eerste API-call wordt automatisch één lening (20k, 60 maanden, €330/maand) met 60 maandrecords aangemaakt. Betalingen kunnen daarna via de UI of de REST endpoints worden aangepast.
+## Seed-data (productieklaar)
+Bij de eerste API-start worden automatisch de autolening (20k, 60 maanden, €330/maand) en 5 gebruikers aangemaakt. Er worden geen mockrecords in de UI gebruikt; alle data komt uit de database.
+
+Beschikbare accounts:
+- Gilbert / BMW123
+- Christian / BMW123
+- Frank / BMW123
+- Jasper / BMW123
+- Guest / BMW123
 
 ## REST API
-- `GET /loan` – samenvatting van de lening inclusief voortgang.
-- `GET /payments` – lijst van alle 60 betalingen.
-- `POST /payments/:month` – status/datum/notitie voor de betreffende maand bijwerken (beveiliging op looptijd).
+- `POST /auth/login` – ontvang een JWT voor een geldige gebruiker.
+- `GET /loan` – samenvatting van de lening inclusief voortgang (Bearer token vereist).
+- `GET /payments` – lijst van alle 60 betalingen (Bearer token vereist).
+- `POST /payments/:month` – status/datum/notitie voor de betreffende maand bijwerken (beveiliging op looptijd en token vereist).
 
 ## Ontwikkelnotities
 - Tailwind wordt geconfigureerd via `tailwind.config.js` en `postcss.config.js`.
 - TypeScript types vind je in `src/types.ts`.
 - Componenten zijn opgesplitst in `Dashboard`, `LoanCharts`, `PaymentTable`, `PaymentModal` en `Login`.
+- De login flow gebruikt JWT en axios interceptors om de token automatisch mee te sturen.
