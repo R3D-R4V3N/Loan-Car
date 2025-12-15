@@ -71,17 +71,6 @@ export function Login({ onLogin }: LoginProps) {
         <button type="submit" className="btn-primary w-full" disabled={loading}>
           {loading ? 'Aan het inloggen...' : 'Log in'}
         </button>
-
-        <div className="text-xs text-slate-500">
-          <p className="font-semibold mb-1">Beschikbare gebruikers:</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Gilbert / BMW123</li>
-            <li>Christian / BMW123</li>
-            <li>Frank / BMW123</li>
-            <li>Jasper / BMW123</li>
-            <li>Guest / BMW123</li>
-          </ul>
-        </div>
       </form>
     </div>
   )

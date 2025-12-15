@@ -152,15 +152,14 @@ function App() {
           <div className="grid gap-3 md:grid-cols-2">
             <div className="relative overflow-hidden rounded-2xl shadow-sm border border-slate-200 bg-white">
               <img
-                src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=80"
+                src="../public/BMW.jpg"
                 alt="Zwarte BMW auto"
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-transparent" />
               <div className="absolute bottom-4 left-4 text-white space-y-1">
                 <p className="text-xs uppercase tracking-[0.2em]">Auto financiering</p>
-                <p className="text-lg font-semibold">BMW - rentevrij</p>
-                <p className="text-sm opacity-90">Startdatum instelbaar, directe statusupdates</p>
+                <p className="text-lg font-semibold">BMW 220i Gran Coupé</p>
               </div>
             </div>
             <div className="card px-4 py-3 bg-white shadow-sm border border-slate-200 flex flex-col justify-between">

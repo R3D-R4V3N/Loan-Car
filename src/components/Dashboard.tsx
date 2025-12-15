@@ -51,29 +51,29 @@ export function Dashboard({ loan }: DashboardProps) {
       <div className="card p-6 bg-slate-900 text-white">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-sm text-slate-300">Totale lening</p>
+            <p className="text-sm text-slate-500">Totale lening</p>
             <h2 className="text-3xl font-bold">{formatCurrency(loan.principal)}</h2>
           </div>
           <div className="text-right">
-            <p className="text-sm text-slate-300">Maandbedrag</p>
+            <p className="text-sm text-slate-500">Maandbedrag</p>
             <p className="text-xl font-semibold">{formatCurrency(loan.monthlyPayment)}</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 text-sm text-slate-200">
+        <div className="grid grid-cols-2 gap-3 text-sm text-slate-900">
           <div>
-            <p className="text-slate-400">Looptijd</p>
+            <p className="text-slate-500">Looptijd</p>
             <p className="font-semibold">{loan.totalMonths} maanden</p>
           </div>
           <div>
-            <p className="text-slate-400">Resterend</p>
+            <p className="text-slate-500">Resterend</p>
             <p className="font-semibold">{loan.remainingMonths} maanden</p>
           </div>
           <div>
-            <p className="text-slate-400">Startdatum</p>
+            <p className="text-slate-500">Startdatum</p>
             <p className="font-semibold">{new Date(loan.startDate).toLocaleDateString('nl-NL')}</p>
           </div>
           <div>
-            <p className="text-slate-400">Status</p>
+            <p className="text-slate-500">Status</p>
             <p className="font-semibold">{progress >= 100 ? 'Volledig afbetaald' : 'Actief'}</p>
           </div>
         </div>

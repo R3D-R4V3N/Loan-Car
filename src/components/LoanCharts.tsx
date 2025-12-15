@@ -45,12 +45,12 @@ export function LoanCharts({ loan, payments }: LoanChartsProps) {
 
   return (
     <section className="grid gap-4 lg:grid-cols-2">
-      <div className="card p-6 h-[320px]">
+      <div className="card p-6 h-[350px]">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-slate-900">Resterend bedrag per maand</h3>
           <span className="text-sm text-slate-500">Line chart</span>
         </div>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="90%">
           <LineChart data={monthlyData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#94a3b8" />
@@ -61,12 +61,12 @@ export function LoanCharts({ loan, payments }: LoanChartsProps) {
         </ResponsiveContainer>
       </div>
 
-      <div className="card p-6 h-[320px]">
+      <div className="card p-6 h-[350px]">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-slate-900">Betaald vs niet betaald</h3>
           <span className="text-sm text-slate-500">Bar chart</span>
         </div>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="90%">
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#94a3b8" />
