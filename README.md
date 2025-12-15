@@ -62,11 +62,13 @@ Beschikbare accounts:
 - Jasper / BMW123
 - Guest / BMW123
 
+Alleen **Jasper** heeft toestemming om betalingsdata te wijzigen; andere gebruikers kunnen uitsluitend het dashboard en de grafieken in read-only modus bekijken.
+
 ## REST API
 - `POST /auth/login` – ontvang een JWT voor een geldige gebruiker.
 - `GET /loan` – samenvatting van de lening inclusief voortgang (Bearer token vereist).
 - `GET /payments` – lijst van alle 60 betalingen (Bearer token vereist).
-- `POST /payments/:month` – status/datum/notitie voor de betreffende maand bijwerken (beveiliging op looptijd en token vereist).
+- `POST /payments/:month` – status/datum/notitie voor de betreffende maand bijwerken (beveiliging op looptijd en token vereist, alleen Jasper toegestaan).
 
 ## Ontwikkelnotities
 - Tailwind wordt geconfigureerd via `tailwind.config.js` en `postcss.config.js`.

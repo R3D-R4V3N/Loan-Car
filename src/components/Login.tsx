@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'react-toastify'
 import { login } from '../api'
 
 interface LoginProps {
@@ -24,6 +25,7 @@ export function Login({ onLogin }: LoginProps) {
     } catch (err: unknown) {
       console.error(err)
       setError('Ongeldige gebruikersnaam of wachtwoord')
+      toast.error('Ongeldige gebruikersnaam of wachtwoord')
     } finally {
       setLoading(false)
     }

@@ -4,16 +4,17 @@ interface PaymentTableProps {
   payments: Payment[]
   onSelect: (payment: Payment) => void
   onToggle: (payment: Payment) => void
+  canEdit: boolean
 }
 
 const formatDate = (date?: string | null) => (date ? new Date(date).toLocaleDateString('nl-NL') : '-')
 
-export function PaymentTable({ payments, onSelect, onToggle }: PaymentTableProps) {
+export function PaymentTable({ payments, onSelect, onToggle, canEdit }: PaymentTableProps) {
   return (
     <div className="card p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-slate-900">Maandelijkse betalingen</h3>
-        <p className="text-sm text-slate-500">Klik op een rij om te bewerken</p>
+        <p className="text-sm text-slate-500">{canEdit ? 'Klik op een rij om te bewerken' : 'Alleen Jasper kan wijzigingen maken'}</p>
       </div>
       <div className="overflow-auto">
         <table className="min-w-full text-sm">
@@ -28,7 +29,11 @@ export function PaymentTable({ payments, onSelect, onToggle }: PaymentTableProps
           </thead>
           <tbody>
             {payments.map((payment) => (
-              <tr key={payment.id} className="table-row cursor-pointer" onClick={() => onSelect(payment)}>
+              <tr
+                key={payment.id}
+                className={`table-row ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-90'}`}
+                onClick={() => onSelect(payment)}
+              >
                 <td className="px-4 py-3 font-semibold text-slate-800">Maand {payment.month}</td>
                 <td className="px-4 py-3">€{payment.amount.toFixed(2)}</td>
                 <td className="px-4 py-3">
@@ -44,16 +49,20 @@ export function PaymentTable({ payments, onSelect, onToggle }: PaymentTableProps
                 </td>
                 <td className="px-4 py-3 text-slate-600">{formatDate(payment.paidAt)}</td>
                 <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    className={`rounded-lg px-3 py-2 text-xs font-semibold shadow-sm transition-colors ${
-                      payment.status === 'PAID'
-                        ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-100'
-                        : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-100'
-                    }`}
-                    onClick={() => onToggle(payment)}
-                  >
-                    {payment.status === 'PAID' ? 'Markeer als onbetaald' : 'Markeer als betaald'}
-                  </button>
+                  {canEdit ? (
+                    <button
+                      className={`rounded-lg px-3 py-2 text-xs font-semibold shadow-sm transition-colors ${
+                        payment.status === 'PAID'
+                          ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-100'
+                          : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-100'
+                      }`}
+                      onClick={() => onToggle(payment)}
+                    >
+                      {payment.status === 'PAID' ? 'Markeer als onbetaald' : 'Markeer als betaald'}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-slate-500">Alleen Jasper kan aanpassen</span>
+                  )}
                 </td>
               </tr>
             ))}

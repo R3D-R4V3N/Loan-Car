@@ -115,6 +115,7 @@ function authenticate(req, res, next) {
   try {
     const payload = jwt.verify(token, jwtSecret)
     req.userId = payload.id
+    req.username = payload.username
     return next()
   } catch (error) {
     return res.status(401).json({ message: 'Ongeldig of verlopen token' })
@@ -170,6 +171,10 @@ app.get('/payments', authenticate, async (_req, res) => {
 app.post('/payments/:month', authenticate, async (req, res) => {
   const month = Number(req.params.month)
   const { status, paidAt, note } = req.body
+
+  if (req.username !== 'Jasper') {
+    return res.status(403).json({ message: 'Alleen Jasper mag betalingen aanpassen' })
+  }
 
   if (!['PAID', 'UNPAID'].includes(status)) {
     return res.status(400).json({ message: 'Status moet PAID of UNPAID zijn' })

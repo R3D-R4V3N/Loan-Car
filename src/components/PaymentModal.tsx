@@ -5,9 +5,10 @@ interface PaymentModalProps {
   payment: Payment | null
   onClose: () => void
   onSave: (payload: { month: number; status: PaymentStatus; paidAt?: string; note?: string }) => void
+  canEdit: boolean
 }
 
-export function PaymentModal({ payment, onClose, onSave }: PaymentModalProps) {
+export function PaymentModal({ payment, onClose, onSave, canEdit }: PaymentModalProps) {
   const [status, setStatus] = useState<PaymentStatus>('UNPAID')
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
@@ -40,6 +41,7 @@ export function PaymentModal({ payment, onClose, onSave }: PaymentModalProps) {
               checked={status === 'PAID'}
               onChange={(e) => setStatus(e.target.checked ? 'PAID' : 'UNPAID')}
               className="h-4 w-4"
+              disabled={!canEdit}
             />
             Betaald
           </label>
@@ -51,7 +53,7 @@ export function PaymentModal({ payment, onClose, onSave }: PaymentModalProps) {
               className="input"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              disabled={status === 'UNPAID'}
+              disabled={status === 'UNPAID' || !canEdit}
             />
           </div>
 
@@ -63,6 +65,7 @@ export function PaymentModal({ payment, onClose, onSave }: PaymentModalProps) {
               placeholder="Bijvoorbeeld: vooruitbetaling of vertraagd"
               value={note}
               onChange={(e) => setNote(e.target.value)}
+              disabled={!canEdit}
             />
           </div>
         </div>
@@ -71,12 +74,14 @@ export function PaymentModal({ payment, onClose, onSave }: PaymentModalProps) {
           <button className="btn-secondary" onClick={onClose} type="button">
             Annuleren
           </button>
-          <button
-            className="btn-primary"
-            onClick={() => onSave({ month: payment.month, status, paidAt: date || undefined, note })}
-          >
-            Opslaan
-          </button>
+          {canEdit && (
+            <button
+              className="btn-primary"
+              onClick={() => onSave({ month: payment.month, status, paidAt: date || undefined, note })}
+            >
+              Opslaan
+            </button>
+          )}
         </div>
       </div>
     </div>
