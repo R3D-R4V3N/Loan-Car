@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import { Payment } from '../types'
 
 interface PaymentTableProps {
@@ -5,16 +6,47 @@ interface PaymentTableProps {
   onSelect: (payment: Payment) => void
   onToggle: (payment: Payment) => void
   canEdit: boolean
+  startDate: string
 }
 
 const formatDate = (date?: string | null) => (date ? new Date(date).toLocaleDateString('nl-NL') : '-')
 
-export function PaymentTable({ payments, onSelect, onToggle, canEdit }: PaymentTableProps) {
+const monthYearLabel = (startDate: string, monthNumber: number) => {
+  const date = new Date(startDate)
+  if (Number.isNaN(date.getTime())) return `Maand ${monthNumber}`
+  date.setMonth(date.getMonth() + (monthNumber - 1))
+  return date.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
+}
+
+export function PaymentTable({ payments, onSelect, onToggle, canEdit, startDate }: PaymentTableProps) {
+  const [page, setPage] = useState(0)
+  const monthsPerPage = 12
+
+  useEffect(() => {
+    setPage(0)
+  }, [payments])
+
+  const sortedPayments = useMemo(() => payments.slice().sort((a, b) => a.month - b.month), [payments])
+  const totalPages = Math.max(1, Math.ceil(sortedPayments.length / monthsPerPage))
+  const pagePayments = sortedPayments.slice(page * monthsPerPage, page * monthsPerPage + monthsPerPage)
+
+  const pageRangeLabel = () => {
+    const startPayment = pagePayments[0]
+    const endPayment = pagePayments[pagePayments.length - 1]
+    if (!startPayment || !endPayment) return ''
+    const startLabel = monthYearLabel(startDate, startPayment.month)
+    const endLabel = monthYearLabel(startDate, endPayment.month)
+    return startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`
+  }
+
   return (
     <div className="card p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-slate-900">Maandelijkse betalingen</h3>
-        <p className="text-sm text-slate-500">{canEdit ? 'Klik op een rij om te bewerken' : 'Alleen Jasper kan wijzigingen maken'}</p>
+        <div className="text-right">
+          <p className="text-sm text-slate-500">{pageRangeLabel()}</p>
+          <p className="text-xs text-slate-500">{canEdit ? 'Klik op een rij om te bewerken' : 'Alleen Jasper kan wijzigingen maken'}</p>
+        </div>
       </div>
       <div className="overflow-auto">
         <table className="min-w-full text-sm">
@@ -28,13 +60,18 @@ export function PaymentTable({ payments, onSelect, onToggle, canEdit }: PaymentT
             </tr>
           </thead>
           <tbody>
-            {payments.map((payment) => (
+            {pagePayments.map((payment) => (
               <tr
                 key={payment.id}
                 className={`table-row ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-90'}`}
                 onClick={() => onSelect(payment)}
               >
-                <td className="px-4 py-3 font-semibold text-slate-800">Maand {payment.month}</td>
+                <td className="px-4 py-3 font-semibold text-slate-800">
+                  <div className="flex flex-col">
+                    <span>{monthYearLabel(startDate, payment.month)}</span>
+                    <span className="text-xs text-slate-500">Maand {payment.month}</span>
+                  </div>
+                </td>
                 <td className="px-4 py-3">€{payment.amount.toFixed(2)}</td>
                 <td className="px-4 py-3">
                   <span
@@ -68,6 +105,27 @@ export function PaymentTable({ payments, onSelect, onToggle, canEdit }: PaymentT
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="flex items-center justify-between mt-4 text-sm text-slate-600">
+        <span>
+          Pagina {page + 1} van {totalPages} (toon {monthsPerPage} maanden per pagina)
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            className="btn-secondary px-3 py-1 text-xs"
+            onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+            disabled={page === 0}
+          >
+            Vorige
+          </button>
+          <button
+            className="btn-secondary px-3 py-1 text-xs"
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+            disabled={page === totalPages - 1}
+          >
+            Volgende
+          </button>
+        </div>
       </div>
     </div>
   )

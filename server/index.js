@@ -19,6 +19,7 @@ const DEFAULT_LOAN = {
   principal: 20000,
   monthlyPayment: 330,
   totalMonths: 60,
+  startDate: new Date('2026-01-01'),
 }
 
 async function ensureLoan() {
@@ -29,7 +30,7 @@ async function ensureLoan() {
         principal: DEFAULT_LOAN.principal,
         monthlyPayment: DEFAULT_LOAN.monthlyPayment,
         totalMonths: DEFAULT_LOAN.totalMonths,
-        startDate: new Date(),
+        startDate: DEFAULT_LOAN.startDate,
         payments: {
           create: Array.from({ length: DEFAULT_LOAN.totalMonths }).map((_, index) => ({
             month: index + 1,
@@ -40,7 +41,7 @@ async function ensureLoan() {
       },
       include: { payments: true },
     })
-  } else if (loan.payments.length < DEFAULT_LOAN.totalMonths) {
+  } else {
     const existingMonths = new Set(loan.payments.map((p) => p.month))
     const missingMonths = Array.from({ length: DEFAULT_LOAN.totalMonths })
       .map((_, idx) => idx + 1)
@@ -56,6 +57,11 @@ async function ensureLoan() {
         })),
       })
     }
+
+    if (loan.startDate.toISOString() !== DEFAULT_LOAN.startDate.toISOString()) {
+      await prisma.loan.update({ where: { id: loan.id }, data: { startDate: DEFAULT_LOAN.startDate } })
+    }
+
     loan = await prisma.loan.findUnique({ where: { id: loan.id }, include: { payments: true } })
   }
   return loan

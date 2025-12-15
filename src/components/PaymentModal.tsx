@@ -6,9 +6,17 @@ interface PaymentModalProps {
   onClose: () => void
   onSave: (payload: { month: number; status: PaymentStatus; paidAt?: string; note?: string }) => void
   canEdit: boolean
+  startDate: string
 }
 
-export function PaymentModal({ payment, onClose, onSave, canEdit }: PaymentModalProps) {
+const monthYearLabel = (startDate: string, monthNumber: number) => {
+  const date = new Date(startDate)
+  if (Number.isNaN(date.getTime())) return `Maand ${monthNumber}`
+  date.setMonth(date.getMonth() + (monthNumber - 1))
+  return date.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
+}
+
+export function PaymentModal({ payment, onClose, onSave, canEdit, startDate }: PaymentModalProps) {
   const [status, setStatus] = useState<PaymentStatus>('UNPAID')
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
@@ -28,7 +36,9 @@ export function PaymentModal({ payment, onClose, onSave, canEdit }: PaymentModal
       <div className="card w-full max-w-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-sm text-slate-500">Maand {payment.month}</p>
+            <p className="text-sm text-slate-500">
+              Maand {payment.month} · {monthYearLabel(startDate, payment.month)}
+            </p>
             <h3 className="text-2xl font-semibold text-slate-900">{payment.amount.toFixed(2)} EUR</h3>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600">×</button>

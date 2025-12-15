@@ -55,6 +55,8 @@ De frontend verwacht standaard dat de API op `http://localhost:4000` draait (pas
 ## Seed-data (productieklaar)
 Bij de eerste API-start worden automatisch de autolening (20k, 60 maanden, €330/maand) en 5 gebruikers aangemaakt. Er worden geen mockrecords in de UI gebruikt; alle data komt uit de database.
 
+- Startdatum lening: **1 januari 2026** (alle maandlabels volgen deze datum in de UI)
+
 Beschikbare accounts:
 - Gilbert / BMW123
 - Christian / BMW123
@@ -75,3 +77,4 @@ Alleen **Jasper** heeft toestemming om betalingsdata te wijzigen; andere gebruik
 - TypeScript types vind je in `src/types.ts`.
 - Componenten zijn opgesplitst in `Dashboard`, `LoanCharts`, `PaymentTable`, `PaymentModal` en `Login`.
 - De login flow gebruikt JWT en axios interceptors om de token automatisch mee te sturen.
+- De betalingentabel pagineert per 12 maanden (per jaar) en toont expliciet maand + jaar op basis van de startdatum.

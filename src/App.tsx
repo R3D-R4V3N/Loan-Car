@@ -20,6 +20,17 @@ function App() {
   const [user, setUser] = useState<string>(localStorage.getItem('loan-user') || '')
   const canEdit = user === 'Jasper'
 
+  const handleLogout = () => {
+    localStorage.removeItem('loan-token')
+    localStorage.removeItem('loan-auth')
+    localStorage.removeItem('loan-user')
+    setAuthenticated(false)
+    setUser('')
+    setLoan(null)
+    setPayments([])
+    toast.info('Je bent uitgelogd')
+  }
+
   const loadData = async () => {
     try {
       setLoading(true)
@@ -124,7 +135,14 @@ function App() {
             <p className="text-sm uppercase tracking-widest text-indigo-600 font-semibold">Autolening</p>
             <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Renteloze autolening dashboard</h1>
             <p className="text-slate-600">Beheer het leenbedrag van €20.000 over 60 maanden met realtime inzichten.</p>
-            <p className="text-sm text-slate-500">Ingelogd als <span className="font-semibold text-slate-700">{user || 'onbekend'}</span></p>
+            <div className="flex items-center gap-3 text-sm text-slate-500">
+              <p>
+                Ingelogd als <span className="font-semibold text-slate-700">{user || 'onbekend'}</span>
+              </p>
+              <button className="btn-secondary px-3 py-1 text-xs" onClick={handleLogout}>
+                Log uit
+              </button>
+            </div>
             {!canEdit && (
               <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 inline-flex items-center gap-2">
                 Alleen Jasper kan betalingen aanpassen. Je bekijkt een readonly dashboard.
@@ -163,6 +181,7 @@ function App() {
           <PaymentTable
             payments={payments}
             canEdit={canEdit}
+            startDate={derivedLoan.startDate}
             onSelect={(payment) => {
               if (!canEdit) {
                 toast.error('Alleen Jasper kan betalingen aanpassen.')
@@ -177,6 +196,7 @@ function App() {
         <PaymentModal
           canEdit={canEdit}
           payment={selectedPayment}
+          startDate={derivedLoan?.startDate || ''}
           onClose={() => setSelectedPayment(null)}
           onSave={handleSavePayment}
         />
