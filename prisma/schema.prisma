@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+}
+
+model Loan {
+  id             Int       @id @default(autoincrement())
+  principal      Int
+  monthlyPayment Int
+  totalMonths    Int
+  startDate      DateTime
+  payments       Payment[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Payment {
+  id        Int           @id @default(autoincrement())
+  month     Int
+  amount    Int
+  status    PaymentStatus @default(UNPAID)
+  paidAt    DateTime?
+  note      String?
+  loan      Loan         @relation(fields: [loanId], references: [id])
+  loanId    Int
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([loanId, month], name: "loanId_month")
+}
